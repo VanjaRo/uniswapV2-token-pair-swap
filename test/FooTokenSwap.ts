@@ -14,21 +14,29 @@ const USDC_TOKEN_AMOUNT_TO_TRANSFER = 1e7;
 const USDC_TOKEN_LIQUIDITY_SUPPLY = 1e7;
 const USDC_TOKEN_MIN_AMOUNT_EXCHANGE = 1e3;
 
+// Describe all addresses needed for the test:
+// USDC token address
+const USDC_MAINNET_ADDRESS = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+// Circle address
+const USDC_WHALE_MAINNET_ADDRESS = "0x55FE002aefF02F77364de339a1292923A15844B8";
+// Uniswap addresses
+const UNISWAP_V2_FACTORY_MAINNET_ADDRESS =
+  "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+const UNISWAP_V2_ROUTER_MAINNET_ADDRESS =
+  "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+
 describe("FooToken", function () {
-  // TODO: Put to constants
-  // Describe all addresses needed for the test:
-  // USDC token address
-  const usdcAddress = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
-  const usdcWhaleAddress = "0x55FE002aefF02F77364de339a1292923A15844B8";
-  // Uniswap addresses
-  const uniswapV2FactoryAddress = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
-  const uniswapV2RouterAddress = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
   async function deployFooFixture() {
     const [owner] = await ethers.getSigners();
 
     // Impersonate USDC token holder and trasfer 1000 to "owner"
-    const usdcToken = await ethers.getContractAt("IERC20", usdcAddress);
-    const usdcHolder = await ethers.getImpersonatedSigner(usdcWhaleAddress);
+    const usdcToken = await ethers.getContractAt(
+      "IERC20",
+      USDC_MAINNET_ADDRESS
+    );
+    const usdcHolder = await ethers.getImpersonatedSigner(
+      USDC_WHALE_MAINNET_ADDRESS
+    );
     await usdcToken
       .connect(usdcHolder)
       .transfer(owner.address, USDC_TOKEN_AMOUNT_TO_TRANSFER);
@@ -63,7 +71,7 @@ describe("FooToken", function () {
 
       const uniswapV2Factory = await ethers.getContractAt(
         UniswapV2Factory.abi,
-        uniswapV2FactoryAddress
+        UNISWAP_V2_FACTORY_MAINNET_ADDRESS
       );
 
       // Create pair from transaction
@@ -77,17 +85,17 @@ describe("FooToken", function () {
 
       const uniswapV2Router = await ethers.getContractAt(
         UniswapV2Router.abi,
-        uniswapV2RouterAddress
+        UNISWAP_V2_ROUTER_MAINNET_ADDRESS
       );
 
       // Approve transfer to UniswapV2
       // approval makes transferFrom possible
       await fooToken.approve(
-        uniswapV2RouterAddress,
+        UNISWAP_V2_ROUTER_MAINNET_ADDRESS,
         FOO_TOKEN_LIQUIDITY_SUPPLY
       );
       await usdcToken.approve(
-        uniswapV2RouterAddress,
+        UNISWAP_V2_ROUTER_MAINNET_ADDRESS,
         USDC_TOKEN_LIQUIDITY_SUPPLY
       );
 
@@ -119,7 +127,10 @@ describe("FooToken", function () {
         usdcBalanceBefore.toString()
       );
 
-      await fooToken.approve(uniswapV2RouterAddress, FOO_TOKEN_AMOUNT_EXCHANGE);
+      await fooToken.approve(
+        UNISWAP_V2_ROUTER_MAINNET_ADDRESS,
+        FOO_TOKEN_AMOUNT_EXCHANGE
+      );
       await uniswapV2Router.swapExactTokensForTokens(
         FOO_TOKEN_AMOUNT_EXCHANGE,
         USDC_TOKEN_MIN_AMOUNT_EXCHANGE,
